@@ -8,7 +8,10 @@ import { AppService } from "./app.service";
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGO_URI || ""),
+    // que dios me perdone, dejo el connection string aca
+    MongooseModule.forRoot(
+      "mongodb+srv://desaapps1:desaapps1@cluster0.awxpf.mongodb.net/rcp001?retryWrites=true&w=majority&appName=Cluster0",
+    ),
     RecipesModule,
   ],
   controllers: [AppController],
