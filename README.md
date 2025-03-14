@@ -57,6 +57,112 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+
+## Algunos curls para probar local
+
+# 📌 API de Recetas - Endpoints y cURL
+
+## 🛠️ CRUD de Recetas con NestJS y MongoDB
+
+---
+
+## **📍 1. GET - Obtener todas las recetas**
+```sh
+curl -X GET http://localhost:3000/recipes
+```
+
+📌 **Ejemplo de Respuesta (JSON)**:
+```json
+[
+  {
+    "_id": "60c72b2f5f1b2c001c8e4d7a",
+    "name": "Tarta de Manzana",
+    "ingredients": ["Harina", "Manzana", "Azúcar", "Canela", "Manteca"],
+    "steps": [
+      { "description": "Precalentar el horno a 180°C" },
+      { "description": "Preparar la masa", "imageUrl": "https://example.com/images/step1.jpg" }
+    ],
+    "imageUrls": ["https://example.com/images/tarta.jpg"],
+    "userId": "12345"
+  }
+]
+```
+
+---
+
+## **📍 2. GET - Obtener una receta por ID**
+```sh
+curl -X GET http://localhost:3000/recipes/60c72b2f5f1b2c001c8e4d7a
+```
+
+---
+
+## **📍 3. POST - Crear una receta con varios pasos**
+```sh
+curl -X POST http://localhost:3000/recipes \
+     -H "Content-Type: application/json" \
+     -d '{
+           "name": "Tarta de Manzana",
+           "ingredients": ["Harina", "Manzana", "Azúcar", "Canela", "Manteca"],
+           "steps": [
+             { "description": "Precalentar el horno a 180°C" },
+             { "description": "Preparar la masa", "imageUrl": "https://example.com/images/step1.jpg" },
+             { "description": "Cortar las manzanas", "imageUrl": "https://example.com/images/step2.jpg" },
+             { "description": "Armar la tarta y hornear" }
+           ],
+           "imageUrls": ["https://example.com/images/tarta.jpg"],
+           "userId": "12345"
+         }'
+```
+
+📌 **Notas**:
+- Se incluyen varios pasos (`steps`), algunos con imágenes (`imageUrl`).
+- Se envía un **userId obligatorio**.
+
+---
+
+## **📍 4. PUT - Actualizar una receta (ejemplo: cambiar nombre)**
+```sh
+curl -X PUT http://localhost:3000/recipes/60c72b2f5f1b2c001c8e4d7a \
+     -H "Content-Type: application/json" \
+     -d '{
+           "name": "Tarta de Manzana Casera"
+         }'
+```
+
+---
+
+## **📍 5. PUT - Eliminar un paso de la receta**
+```sh
+curl -X PUT http://localhost:3000/recipes/60c72b2f5f1b2c001c8e4d7a \
+     -H "Content-Type: application/json" \
+     -d '{
+           "steps": [
+             { "description": "Precalentar el horno a 180°C" },
+             { "description": "Preparar la masa", "imageUrl": "https://example.com/images/step1.jpg" },
+             { "description": "Armar la tarta y hornear" }
+           ]
+         }'
+```
+📌 **Elimina el paso "Cortar las manzanas" simplemente omitiéndolo en la actualización.**
+
+---
+
+## **📍 6. DELETE - Eliminar una receta**
+```sh
+curl -X DELETE http://localhost:3000/recipes/60c72b2f5f1b2c001c8e4d7a
+```
+
+📌 **Borra la receta completamente de la base de datos.**
+
+---
+
+## 📜 **Notas Finales**
+- 📌 **Reemplaza los IDs de ejemplo (`60c72b2f5f1b2c001c8e4d7a`) por IDs reales de tu base de datos.**
+- 🚀 **Asegúrate de que el servidor esté corriendo antes de probar los endpoints.**
+- 🔐 **Si usas autenticación, agrega el token en los headers con `-H "Authorization: Bearer <tu_token>"`.**
+
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
