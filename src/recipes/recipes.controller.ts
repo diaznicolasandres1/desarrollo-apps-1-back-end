@@ -20,7 +20,7 @@ export class RecipesController {
   @Get()
   async getAll(
     @Query("limit", new ParseIntPipe({ optional: true })) limit?: number,
-    @Query("sort") sort: string = "desc"
+    @Query("sort") sort: string = "desc",
   ) {
     return this.recipesService.getAll(limit, sort);
   }
@@ -28,14 +28,14 @@ export class RecipesController {
   @Get("filter")
   async getFilteredByIngredients(
     @Query("ingredients") ingredients: string,
-    @Query("exclude") exclude: string
+    @Query("exclude") exclude: string,
   ) {
     const ingredientsArray = ingredients ? ingredients.split(",") : [];
     const excludeBool = exclude === "true";
 
     return this.recipesService.getFilteredByIngredients(
       ingredientsArray,
-      excludeBool
+      excludeBool,
     );
   }
 

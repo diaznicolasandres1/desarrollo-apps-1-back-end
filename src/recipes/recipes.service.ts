@@ -33,10 +33,10 @@ export class RecipesService {
 
   async getFilteredByIngredients(
     ingredients: string[],
-    exclude: boolean
+    exclude: boolean,
   ): Promise<Recipe[]> {
     const regexIngredients = ingredients.map(
-      (ing) => new RegExp(ing, "i") // for case-insensitive
+      (ing) => new RegExp(ing, "i"), // for case-insensitive
     );
 
     const query = exclude
