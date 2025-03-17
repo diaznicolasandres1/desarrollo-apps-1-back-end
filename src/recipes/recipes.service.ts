@@ -47,7 +47,10 @@ export class RecipesService {
   }
 
   async create(dto: CreateRecipeDto): Promise<Recipe> {
-    const newRecipe = new this.recipeModel(dto);
+    const newRecipe = new this.recipeModel({
+      ...dto,
+      status: "pending_to_approve",
+    });
     return newRecipe.save();
   }
 
@@ -71,5 +74,19 @@ export class RecipesService {
     }
 
     return deletedRecipe;
+  }
+
+  async approveRecipe(id: string): Promise<Recipe> {
+    const updatedRecipe = await this.recipeModel.findByIdAndUpdate(
+      id,
+      { status: "approved" },
+      { new: true },
+    );
+
+    if (!updatedRecipe) {
+      throw new NotFoundException(`Recipe with id ${id} not found`);
+    }
+
+    return updatedRecipe;
   }
 }

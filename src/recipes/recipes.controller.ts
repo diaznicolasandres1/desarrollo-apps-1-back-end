@@ -58,4 +58,9 @@ export class RecipesController {
   async delete(@Param("id") id: string) {
     return this.recipesService.delete(id);
   }
+
+  @Put(":id/approve")
+  async approveRecipe(@Param("id") id: string) {
+    return this.recipesService.approveRecipe(id);
+  }
 }
