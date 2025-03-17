@@ -28,6 +28,9 @@ export class Recipe extends Document {
 
   @Prop({ required: false, default: Date.now })
   createdAt: Date;
+
+  @Prop({ required: false })
+  status: string;
 }
 
 export const RecipeSchema = SchemaFactory.createForClass(Recipe);
