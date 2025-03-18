@@ -27,15 +27,15 @@ export class RecipesController {
 
   @Get("filter")
   async getFilteredByIngredients(
-    @Query("ingredients") ingredients: string,
+    @Query("include") include: string,
     @Query("exclude") exclude: string,
   ) {
-    const ingredientsArray = ingredients ? ingredients.split(",") : [];
-    const excludeBool = exclude === "true";
+    const includeArray = include ? include.split(",") : [];
+    const excludeArray = exclude ? exclude.split(",") : [];
 
     return this.recipesService.getFilteredByIngredients(
-      ingredientsArray,
-      excludeBool,
+      includeArray,
+      excludeArray,
     );
   }
 
