@@ -32,16 +32,31 @@ export class RecipesService {
   }
 
   async getFilteredByIngredients(
-    ingredients: string[],
-    exclude: boolean,
+    includeIngredients: string[],
+    excludeIngredients: string[],
   ): Promise<Recipe[]> {
-    const regexIngredients = ingredients.map(
-      (ing) => new RegExp(ing, "i"), // for case-insensitive
-    );
+    if ((!includeIngredients || includeIngredients.length === 0) && 
+        (!excludeIngredients || excludeIngredients.length === 0)) {
+      return this.recipeModel.find().exec();
+    }
 
-    const query = exclude
-      ? { ingredients: { $not: { $in: regexIngredients } } }
-      : { ingredients: { $in: regexIngredients } };
+    const includeRegex = includeIngredients.map(ing => new RegExp(ing, "i"));
+    const excludeRegex = excludeIngredients.map(ing => new RegExp(ing, "i"));
+
+    const query: any = {};
+
+    if (includeRegex.length > 0) {
+      query.$and = [
+        { ingredients: { $in: includeRegex } }
+      ];
+    }
+
+    if (excludeRegex.length > 0) {
+      if (!query.$and) {
+        query.$and = [];
+      }
+      query.$and.push({ ingredients: { $nin: excludeRegex } });
+    }
 
     return this.recipeModel.find(query).exec();
   }
