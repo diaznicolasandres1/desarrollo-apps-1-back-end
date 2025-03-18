@@ -4,12 +4,23 @@ import { Model } from "mongoose";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { User } from "./schemas/user.schema";
+import { UsernameExistsException } from "./exceptions/username-exists.exception";
+import { EmailExistsException } from "./exceptions/email-exists.exception";
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(dto: CreateUserDto): Promise<User> {
+    const existingUsername = await this.userModel.findOne({ username: dto.username }).exec();
+    if (existingUsername) {
+      throw new UsernameExistsException(dto.username);
+    }
+    const existingEmail = await this.userModel.findOne({ email: dto.email }).exec();
+    if (existingEmail) {
+      throw new EmailExistsException(dto.email);
+    }
+
     const newUser = new this.userModel({
       ...dto,
       rol: dto.rol || "user",
