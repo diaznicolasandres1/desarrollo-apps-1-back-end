@@ -12,7 +12,6 @@ export class UserService {
   async create(dto: CreateUserDto): Promise<User> {
     const newUser = new this.userModel({
       ...dto,
-      status: "active",
       rol: dto.rol || "user",
     });
     return newUser.save();
