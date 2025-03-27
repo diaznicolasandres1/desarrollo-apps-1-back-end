@@ -117,7 +117,7 @@ export class UserService {
   async changePassword(changePasswordDto: ChangePasswordDto) {
     const user = await this.userModel.findOne({ 
       email: changePasswordDto.email,
-      recoveryCode: changePasswordDto.recoveryCode
+      lastRecoveryCode: changePasswordDto.recoveryCode
     });
 
     if (!user) {
