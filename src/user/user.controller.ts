@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   Put,
+  HttpStatus,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
+import { AuthUserDto } from "./dto/auth-user.dto";
 
 @Controller("users")
 export class UserController {
@@ -56,5 +58,15 @@ export class UserController {
     @Param("id") id: string,
   ) {
     return this.userService.updateRecoveryCode(id);
+  }
+
+  @Post("auth")
+  async auth(@Body() authUserDto: AuthUserDto) {
+    const user = await this.userService.authUser(authUserDto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: "Usuario autenticado exitosamente",
+      data: user
+    };
   }
 } 

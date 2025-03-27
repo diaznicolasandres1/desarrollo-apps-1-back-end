@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -6,6 +6,7 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { User } from "./schemas/user.schema";
 import { UsernameExistsException } from "./exceptions/username-exists.exception";
 import { EmailExistsException } from "./exceptions/email-exists.exception";
+import { AuthUserDto } from "./dto/auth-user.dto";
 
 @Injectable()
 export class UserService {
@@ -83,6 +84,23 @@ export class UserService {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
     return updatedUser;
+  }
+
+  async authUser(authUserDto: AuthUserDto) {
+    const user = await this.userModel.findOne({ 
+      email: authUserDto.email,
+      password: authUserDto.password
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario o contraseña incorrectos');
+    }
+
+    if (user.status === 'register_not_finished') {
+      throw new BadRequestException('El registro del usuario no está completo');
+    }
+
+    return user;
   }
 
 } 
