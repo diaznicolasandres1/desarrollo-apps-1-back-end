@@ -54,6 +54,11 @@ export class UserController {
     return this.userService.updateRecoveryCode(email);
   }
 
+  @Put("change-password")
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+    return this.userService.changePassword(changePasswordDto);
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.userService.findOne(id);
@@ -67,10 +72,5 @@ export class UserController {
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.userService.remove(id);
-  }
-
-  @Put("change-password")
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
-    return this.userService.changePassword(changePasswordDto);
   }
 } 
