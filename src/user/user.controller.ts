@@ -53,11 +53,9 @@ export class UserController {
     return this.userService.remove(id);
   }
 
-  @Put(":id/recovery-code")
-  updateRecoveryCode(
-    @Param("id") id: string,
-  ) {
-    return this.userService.updateRecoveryCode(id);
+  @Post("recovery-code")
+  updateRecoveryCode(@Body('email') email: string) {
+    return this.userService.updateRecoveryCode(email);
   }
 
   @Post("auth")

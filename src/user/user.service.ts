@@ -75,15 +75,25 @@ export class UserService {
     return deletedUser;
   }
 
-  async updateRecoveryCode(id: string): Promise<User> {
-    const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, { lastRecoveryCode: recoveryCode }, { new: true })
-      .exec();
-    if (!updatedUser) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+  async updateRecoveryCode(email: string) {
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
-    return updatedUser;
+
+    if (user.status !== 'full_registered') {
+      throw new BadRequestException('El usuario no está completamente registrado');
+    }
+
+    const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.recoveryCode = recoveryCode;
+    await user.save();
+
+    return {
+      message: 'Código de recuperación generado exitosamente',
+      recoveryCode
+    };
   }
 
   async authUser(authUserDto: AuthUserDto) {
