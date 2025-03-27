@@ -7,6 +7,7 @@ import { User } from "./schemas/user.schema";
 import { UsernameExistsException } from "./exceptions/username-exists.exception";
 import { EmailExistsException } from "./exceptions/email-exists.exception";
 import { AuthUserDto } from "./dto/auth-user.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @Injectable()
 export class UserService {
@@ -111,6 +112,29 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto) {
+    const user = await this.userModel.findOne({ 
+      email: changePasswordDto.email,
+      recoveryCode: changePasswordDto.recoveryCode
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado o código de recuperación inválido');
+    }
+
+    if (user.status !== 'full_registered') {
+      throw new BadRequestException('El usuario no está completamente registrado');
+    }
+
+    user.password = changePasswordDto.newPassword;
+    user.lastRecoveryCode = ''; 
+    await user.save();
+
+    return {
+      message: 'Contraseña actualizada exitosamente'
+    };
   }
 
 } 

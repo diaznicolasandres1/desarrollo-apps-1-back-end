@@ -13,6 +13,7 @@ import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { AuthUserDto } from "./dto/auth-user.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @Controller("users")
 export class UserController {
@@ -66,5 +67,10 @@ export class UserController {
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.userService.remove(id);
+  }
+
+  @Put("change-password")
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+    return this.userService.changePassword(changePasswordDto);
   }
 } 
