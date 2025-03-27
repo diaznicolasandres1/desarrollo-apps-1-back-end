@@ -28,11 +28,6 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.userService.findOne(id);
-  }
-
   @Get("email/:email")
   findByEmail(@Param("email") email: string) {
     return this.userService.findByEmail(email);
@@ -43,21 +38,6 @@ export class UserController {
     return this.userService.findByUsername(username);
   }
 
-  @Put(":id")
-  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
-  }
-
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.userService.remove(id);
-  }
-
-  @Post("recovery-code")
-  updateRecoveryCode(@Body('email') email: string) {
-    return this.userService.updateRecoveryCode(email);
-  }
-
   @Post("auth")
   async auth(@Body() authUserDto: AuthUserDto) {
     const user = await this.userService.authUser(authUserDto);
@@ -66,5 +46,25 @@ export class UserController {
       message: "Usuario autenticado exitosamente",
       data: user
     };
+  }
+
+  @Put("recovery-code")
+  async updateRecoveryCode(@Body('email') email: string) {
+    return this.userService.updateRecoveryCode(email);
+  }
+
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return this.userService.findOne(id);
+  }
+
+  @Put(":id")
+  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(id, updateUserDto);
+  }
+
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return this.userService.remove(id);
   }
 } 

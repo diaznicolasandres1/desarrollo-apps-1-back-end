@@ -87,7 +87,7 @@ export class UserService {
     }
 
     const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
-    user.recoveryCode = recoveryCode;
+    user.lastRecoveryCode = recoveryCode;
     await user.save();
 
     return {
