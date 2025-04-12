@@ -8,15 +8,22 @@ async function bootstrap() {
   app.enableCors();
 
   const config = new DocumentBuilder()
-    .setTitle("API de Recetas")
-    .setDescription("Documentación de la API para gestionar recetas y usuarios")
+    .setTitle("API Documentation")
+    .setDescription("The API description")
     .setVersion("1.0")
-    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-
-  SwaggerModule.setup("api", app, document);
+  SwaggerModule.setup("api", app, document, {
+    customSiteTitle: "API Documentation",
+    customfavIcon: "https://nestjs.com/img/favicon.png",
+    customJs: [
+      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js",
+    ],
+    customCssUrl: [
+      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css",
+    ],
+  });
 
   const PORT = process.env.PORT || 3000;
   await app.listen(PORT);
