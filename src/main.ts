@@ -34,9 +34,10 @@ async function bootstrap() {
       showExtensions: true,
       showCommonExtensions: true,
       tryItOutEnabled: true,
-      defaultModelsExpandDepth: -1,
+      defaultModelsExpandDepth: 3,
       defaultModelExpandDepth: 3,
-      defaultModelRendering: 'example'
+      defaultModelRendering: 'example',
+      displayOperationId: true
     }
   });
 
