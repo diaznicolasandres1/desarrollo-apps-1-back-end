@@ -56,12 +56,13 @@ export class UserController {
 
   @Post("auth")
   @ApiOperation({ summary: 'Autenticar usuario' })
-  @ApiResponse({ status: 201, description: 'Usuario autenticado exitosamente' })
-  @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
+  @ApiResponse({ status: 200, description: 'Usuario autenticado exitosamente' })
+  @ApiResponse({ status: 404, description: 'Usuario o contraseña incorrectos' })
+  @ApiResponse({ status: 400, description: 'El registro del usuario no está completo' })
   async auth(@Body() authUserDto: AuthUserDto) {
     const user = await this.userService.authUser(authUserDto);
     return {
-      statusCode: HttpStatus.CREATED,
+      statusCode: HttpStatus.OK,
       message: "Usuario autenticado exitosamente",
       data: user
     };
@@ -71,6 +72,7 @@ export class UserController {
   @ApiOperation({ summary: 'Solicitar código de recuperación' })
   @ApiResponse({ status: 200, description: 'Código de recuperación enviado exitosamente' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
+  @ApiResponse({ status: 400, description: 'El usuario no está completamente registrado' })
   async updateRecoveryCode(@Body('email') email: string) {
     return this.userService.updateRecoveryCode(email);
   }
@@ -78,7 +80,8 @@ export class UserController {
   @Put("change-password")
   @ApiOperation({ summary: 'Cambiar contraseña con código de recuperación' })
   @ApiResponse({ status: 200, description: 'Contraseña cambiada exitosamente' })
-  @ApiResponse({ status: 400, description: 'Código de recuperación inválido' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado o código de recuperación inválido' })
+  @ApiResponse({ status: 400, description: 'El usuario no está completamente registrado' })
   async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
     return this.userService.changePassword(changePasswordDto);
   }

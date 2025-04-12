@@ -136,5 +136,4 @@ export class UserService {
       message: 'Contraseña actualizada exitosamente'
     };
   }
-
 } 
