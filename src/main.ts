@@ -8,21 +8,23 @@ async function bootstrap() {
   app.enableCors();
 
   const config = new DocumentBuilder()
-    .setTitle("API Documentation")
-    .setDescription("The API description")
+    .setTitle("API de Recetas")
+    .setDescription("API para gestionar recetas de cocina")
     .setVersion("1.0")
+    .addTag("Recetas", "Endpoints para gestionar recetas")
+    .addTag("Usuarios", "Endpoints para gestionar usuarios")
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document, {
-    customSiteTitle: "API Documentation",
+    customSiteTitle: "API de Recetas - Documentación",
     customfavIcon: "https://nestjs.com/img/favicon.png",
     customJs: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js'
+      'https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js',
+      'https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js'
     ],
     customCssUrl: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.css'
+      'https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css'
     ],
     swaggerOptions: {
       persistAuthorization: true,
@@ -31,7 +33,10 @@ async function bootstrap() {
       filter: true,
       showExtensions: true,
       showCommonExtensions: true,
-      tryItOutEnabled: true
+      tryItOutEnabled: true,
+      defaultModelsExpandDepth: -1,
+      defaultModelExpandDepth: 3,
+      defaultModelRendering: 'example'
     }
   });
 
@@ -39,6 +44,6 @@ async function bootstrap() {
   await app.listen(PORT);
 
   console.log(`🚀 Servidor corriendo en: http://localhost:${PORT}`);
-  console.log(`📄 Swagger disponible en: http://localhost:${PORT}/api`);
+  console.log(`📚 Documentación de la API en: http://localhost:${PORT}/api`);
 }
 bootstrap();
