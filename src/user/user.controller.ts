@@ -9,12 +9,13 @@ import {
   Put,
   HttpStatus,
 } from "@nestjs/common";
+import {  } from '@nestjs/swagger';
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { AuthUserDto } from "./dto/auth-user.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiExcludeEndpoint } from '@nestjs/swagger';
 
 @ApiTags('Usuarios')
 @Controller("users")
@@ -22,6 +23,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Crear un nuevo usuario' })
   @ApiResponse({ status: 201, description: 'Usuario creado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos del usuario inválidos' })
