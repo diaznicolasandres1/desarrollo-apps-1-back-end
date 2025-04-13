@@ -1,5 +1,6 @@
 // src/recipes/dto/update-recipe.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
+import { IngredientDto, StepDto, MediaResourceDto } from './nested/recipe-nested.dto';
 
 export class UpdateRecipeDto {
   @ApiProperty({
@@ -10,31 +11,60 @@ export class UpdateRecipeDto {
   name?: string;
 
   @ApiProperty({
-    example: ['Harina', 'Manzana', 'Azúcar', 'Canela', 'Manteca'],
-    description: 'Lista de ingredientes necesarios',
+    type: [IngredientDto],
+    description: 'Lista de ingredientes necesarios con sus cantidades',
+    required: false
+  })
+  ingredients?: IngredientDto[];
+
+  @ApiProperty({
+    example: 'Una deliciosa tarta de manzana casera',
+    description: 'Descripción general de la receta',
+    required: false
+  })
+  description?: string;
+
+  @ApiProperty({
+    type: [StepDto],
+    description: 'Pasos detallados para preparar la receta',
+    required: false
+  })
+  steps?: StepDto[];
+
+  @ApiProperty({
+    type: [MediaResourceDto],
+    description: 'Imágenes principales de la receta',
+    required: false
+  })
+  principalPictures?: MediaResourceDto[];
+
+  @ApiProperty({
+    example: ['postres', 'dulces', 'tartas'],
+    description: 'Categorías de la receta',
     type: [String],
     required: false
   })
-  ingredients?: string[];
+  category?: string[];
 
   @ApiProperty({
-    example: [
-      { description: 'Precalentar el horno a 180°C' },
-      { description: 'Preparar la masa', imageUrl: 'https://example.com/images/step1.jpg' }
-    ],
-    description: 'Pasos para preparar la receta',
-    type: [Object],
+    example: 60,
+    description: 'Duración de la preparación en minutos',
     required: false
   })
-  steps?: {
-    description?: string;
-    imageUrl?: string;
-  }[];
+  duration?: number;
 
   @ApiProperty({
-    example: 'https://example.com/images/tarta.jpg',
-    description: 'URL de la imagen principal de la receta',
+    example: 'media',
+    description: 'Nivel de dificultad de la receta',
+    enum: ['fácil', 'media', 'difícil'],
     required: false
   })
-  principalPicture?: string;
+  difficulty?: string;
+
+  @ApiProperty({
+    example: 8,
+    description: 'Número de porciones que rinde la receta',
+    required: false
+  })
+  servings?: number;
 }

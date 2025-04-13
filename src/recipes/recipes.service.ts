@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CreateRecipeDto } from "./dto/create-recipe.dto";
 import { UpdateRecipeDto } from "./dto/update-recipe.dto";
 import { Recipe } from "./schemas/recipe.schema";
+import { RatingDto, UpdateRatingDto } from "./dto/nested/recipe-nested.dto";
+import * as mongoose from "mongoose";
 
 @Injectable()
 export class RecipesService {
@@ -103,5 +105,51 @@ export class RecipesService {
     }
 
     return updatedRecipe;
+  }
+
+  async addRating(id: string, rating: RatingDto): Promise<Recipe> {
+    const recipe = await this.recipeModel.findById(id);
+    
+    if (!recipe) {
+      throw new NotFoundException(`Recipe with id ${id} not found`);
+    }
+
+    const newRating = {
+      id: new mongoose.Types.ObjectId().toString(),
+      userId: rating.userId,
+      score: rating.score,
+      comment: rating.comment,
+      status: 'pending',
+      createdAt: new Date()
+    };
+
+    recipe.ratings = recipe.ratings || [];
+    recipe.ratings.push(newRating);
+
+    return recipe.save();
+  }
+
+  async updateRating(recipeId: string, ratingId: string, userId: string, dto: UpdateRatingDto): Promise<Recipe> {
+    const recipe = await this.recipeModel.findById(recipeId);
+    
+    if (!recipe) {
+      throw new NotFoundException(`Recipe with id ${recipeId} not found`);
+    }
+
+    recipe.ratings = recipe.ratings || [];
+    const ratingIndex = recipe.ratings.findIndex(r => r.id === ratingId && r.userId === userId);
+    
+    if (ratingIndex === -1) {
+      throw new NotFoundException(`Rating with id ${ratingId} not found for this user`);
+    }
+
+    recipe.ratings[ratingIndex] = {
+      ...recipe.ratings[ratingIndex],
+      score: dto.score,
+      comment: dto.comment,
+      status: 'pending'
+    };
+
+    return recipe.save();
   }
 }

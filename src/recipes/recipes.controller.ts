@@ -8,11 +8,14 @@ import {
   Post,
   Put,
   Query,
+  Headers,
+  HttpStatus,
 } from "@nestjs/common";
 import { CreateRecipeDto } from "./dto/create-recipe.dto";
 import { UpdateRecipeDto } from "./dto/update-recipe.dto";
 import { RecipesService } from "./recipes.service";
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, ApiBody, ApiHeader } from '@nestjs/swagger';
+import { RatingDto, UpdateRatingDto } from './dto/nested/recipe-nested.dto';
 
 @ApiTags('Recetas')
 @Controller("recipes")
@@ -60,6 +63,7 @@ export class RecipesController {
 
   @Post()
   @ApiOperation({ summary: 'Crear una nueva receta' })
+  @ApiBody({ type: CreateRecipeDto })
   @ApiResponse({ status: 201, description: 'Receta creada exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos de la receta inválidos' })
   async create(@Body() dto: CreateRecipeDto) {
@@ -69,6 +73,7 @@ export class RecipesController {
   @Put(":id")
   @ApiOperation({ summary: 'Actualizar una receta existente' })
   @ApiParam({ name: 'id', description: 'ID de la receta a actualizar' })
+  @ApiBody({ type: UpdateRecipeDto })
   @ApiResponse({ status: 200, description: 'Receta actualizada exitosamente' })
   @ApiResponse({ status: 404, description: 'Receta no encontrada' })
   async update(@Param("id") id: string, @Body() dto: UpdateRecipeDto) {
@@ -91,5 +96,71 @@ export class RecipesController {
   @ApiResponse({ status: 404, description: 'Receta no encontrada' })
   async approveRecipe(@Param("id") id: string) {
     return this.recipesService.approveRecipe(id);
+  }
+
+  @Post(":id/ratings")
+  @ApiOperation({ summary: 'Agregar una calificación a una receta' })
+  @ApiParam({ name: 'id', description: 'ID de la receta a calificar' })
+  @ApiBody({ type: RatingDto })
+  @ApiResponse({ status: 201, description: 'Calificación agregada exitosamente' })
+  @ApiResponse({ status: 404, description: 'Receta no encontrada' })
+  async addRating(@Param("id") id: string, @Body() rating: RatingDto) {
+    return this.recipesService.addRating(id, rating);
+  }
+
+  @Put(":recipeId/ratings/:ratingId")
+  @ApiOperation({ 
+    summary: 'Actualizar calificación de una receta',
+    description: 'Actualiza la puntuación y/o comentario de una calificación existente. Solo el usuario que creó la calificación puede modificarla.'
+  })
+  @ApiParam({ 
+    name: 'recipeId', 
+    description: 'ID de la receta',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @ApiParam({ 
+    name: 'ratingId', 
+    description: 'ID de la calificación a actualizar',
+    example: '507f1f77bcf86cd799439012'
+  })
+  @ApiBody({ 
+    type: UpdateRatingDto,
+    description: 'Datos de la actualización de la calificación'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Calificación actualizada exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Calificación actualizada exitosamente' },
+        data: { type: 'object', description: 'Receta actualizada con la calificación modificada' }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Receta o calificación no encontrada',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'Calificación no encontrada para este usuario' },
+        error: { type: 'string', example: 'Not Found' }
+      }
+    }
+  })
+  async updateRating(
+    @Param('recipeId') recipeId: string,
+    @Param('ratingId') ratingId: string,
+    @Body() dto: UpdateRatingDto
+  ) {
+    const recipe = await this.recipesService.updateRating(recipeId, ratingId, dto.userId, dto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: "Calificación actualizada exitosamente",
+      data: recipe
+    };
   }
 }

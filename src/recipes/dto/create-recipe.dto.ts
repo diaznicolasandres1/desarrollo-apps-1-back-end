@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IngredientDto, StepDto, MediaResourceDto } from './nested/recipe-nested.dto';
 
 export class CreateRecipeDto {
   @ApiProperty({
@@ -8,35 +9,59 @@ export class CreateRecipeDto {
   name: string;
 
   @ApiProperty({
-    example: ['Harina', 'Manzana', 'Azúcar', 'Canela', 'Manteca'],
-    description: 'Lista de ingredientes necesarios',
-    type: [String]
+    type: [IngredientDto],
+    description: 'Lista de ingredientes necesarios con sus cantidades'
   })
-  ingredients: string[];
+  ingredients: IngredientDto[];
 
   @ApiProperty({
-    example: [
-      { description: 'Precalentar el horno a 180°C' },
-      { description: 'Preparar la masa', imageUrl: 'https://example.com/images/step1.jpg' }
-    ],
-    description: 'Pasos para preparar la receta',
-    type: [Object]
+    example: 'Una deliciosa tarta de manzana casera',
+    description: 'Descripción general de la receta'
   })
-  steps: {
-    description: string;
-    imageUrl?: string;
-  }[];
+  description: string;
 
   @ApiProperty({
-    example: 'https://example.com/images/tarta.jpg',
-    description: 'URL de la imagen principal de la receta',
+    type: [StepDto],
+    description: 'Pasos detallados para preparar la receta'
+  })
+  steps: StepDto[];
+
+  @ApiProperty({
+    type: [MediaResourceDto],
+    description: 'Imágenes principales de la receta',
     required: false
   })
-  principalPicture?: string;
+  principalPictures?: MediaResourceDto[];
 
   @ApiProperty({
     example: 'usuario123',
     description: 'Nombre de usuario del creador de la receta'
   })
   userName: string;
+
+  @ApiProperty({
+    example: ['postres', 'dulces', 'tartas'],
+    description: 'Categorías de la receta',
+    type: [String]
+  })
+  category: string[];
+
+  @ApiProperty({
+    example: 60,
+    description: 'Duración de la preparación en minutos'
+  })
+  duration: number;
+
+  @ApiProperty({
+    example: 'media',
+    description: 'Nivel de dificultad de la receta',
+    enum: ['fácil', 'media', 'difícil']
+  })
+  difficulty: string;
+
+  @ApiProperty({
+    example: 8,
+    description: 'Número de porciones que rinde la receta'
+  })
+  servings: number;
 }

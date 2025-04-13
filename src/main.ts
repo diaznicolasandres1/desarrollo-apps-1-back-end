@@ -34,8 +34,8 @@ async function bootstrap() {
       showExtensions: true,
       showCommonExtensions: true,
       tryItOutEnabled: true,
-      defaultModelsExpandDepth: 3,
-      defaultModelExpandDepth: 3,
+      defaultModelsExpandDepth: 4,
+      defaultModelExpandDepth: 4,
       defaultModelRendering: 'example',
       displayOperationId: true
     }

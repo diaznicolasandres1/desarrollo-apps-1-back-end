@@ -2,12 +2,12 @@ import { Injectable, NotFoundException, BadRequestException } from "@nestjs/comm
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
 import { User } from "./schemas/user.schema";
 import { UsernameExistsException } from "./exceptions/username-exists.exception";
 import { EmailExistsException } from "./exceptions/email-exists.exception";
 import { AuthUserDto } from "./dto/auth-user.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
+import { AddFavoriteRecipeDto } from "./dto/add-favorite-recipe.dto";
 
 @Injectable()
 export class UserService {
@@ -56,16 +56,6 @@ export class UserService {
       throw new NotFoundException(`Usuario con username ${username} no encontrado`);
     }
     return user;
-  }
-
-  async update(id: string, dto: UpdateUserDto): Promise<User> {
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, dto, { new: true })
-      .exec();
-    if (!updatedUser) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-    return updatedUser;
   }
 
   async remove(id: string): Promise<User> {
@@ -135,5 +125,26 @@ export class UserService {
     return {
       message: 'Contraseña actualizada exitosamente'
     };
+  }
+
+  async addFavoriteRecipe(userId: string, dto: AddFavoriteRecipeDto): Promise<User> {
+    const user = await this.userModel.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+
+    if (user.favedRecipesIds?.includes(dto.recipeId)) {
+      throw new BadRequestException('La receta ya está en favoritos');
+    }
+
+    if (!user.favedRecipesIds) {
+      user.favedRecipesIds = [];
+    }
+
+    user.favedRecipesIds.push(dto.recipeId);
+    await user.save();
+
+    return user;
   }
 } 

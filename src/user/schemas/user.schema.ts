@@ -20,6 +20,9 @@ export class User extends Document {
 
   @Prop({ required: false })
   lastRecoveryCode?: string;
+
+  @Prop({ required: false, type: [String], default: [] })
+  favedRecipesIds?: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User); 
