@@ -11,7 +11,7 @@
 
 1. **Construir Dockerfile:**
    ```dockerfile
-   FROM node:14
+   FROM node:20
    WORKDIR /app
    COPY package.json .
    RUN npm install
@@ -26,9 +26,10 @@
    ```
 
 3. **Crear Repositorio ECR:**
-   - En AWS ECR, crea un repositorio llamado `back-end-recipes`.
+   - En algun cloud provider vamos a disponibilizar la imagen buildeada (vercel,aws,otros), creando un repositorio llamado `back-end-recipes`.
 
-4. **Etiquetar y Subir Imagen a ECR:**
+4. **Etiquetar y Subir Imagen a ECR:*
+   # caso AWS
    ```bash
    aws ecr get-login-password --region tu-region | docker login --username AWS --password-stdin ACA_ACTUALIZAR_CON_LA_URL_QUE_VAYAMOS_A_USAR.amazonaws.com
    docker tag back-end-recipes:latest ACA_ACTUALIZAR_CON_LA_URL_QUE_VAYAMOS_A_USAR.amazonaws.com/back-end-recipes:latest
@@ -36,7 +37,7 @@
    ```
 
 ### Paso 2: Desplegar en ECS
-
+   # caso AWS
 1. **Crear Clúster ECS:**
    - En la consola ECS, crea un nuevo clúster (tipo "EC2").
 
