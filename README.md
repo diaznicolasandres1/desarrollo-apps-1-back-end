@@ -1,208 +1,120 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Despliegue de Backend en AWS usando Docker y ECS
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Preparación
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+1. **Requisitos Previos:**
+   - Node.js/Nest.js funcionando localmente.
+   - Docker instalado localmente.
+   - Cuenta de AWS y AWS CLI configurados.
 
-## Description
+### Paso 1: Crear y Subir Imagen Docker
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+1. **Construir Dockerfile:**
+   ```dockerfile
+   FROM node:14
+   WORKDIR /app
+   COPY package.json .
+   RUN npm install
+   COPY . .
+   RUN npm run build
+   CMD ["node", "dist/main.js"]
+   ```
 
-## Project setup
+2. **Construir Imagen Docker:**
+   ```bash
+   docker build -t back-end-recipes .
+   ```
 
-```bash
-$ npm install
-```
+3. **Crear Repositorio ECR:**
+   - En AWS ECR, crea un repositorio llamado `back-end-recipes`.
 
-## Compile and run the project
+4. **Etiquetar y Subir Imagen a ECR:**
+   ```bash
+   aws ecr get-login-password --region tu-region | docker login --username AWS --password-stdin ACA_ACTUALIZAR_CON_LA_URL_QUE_VAYAMOS_A_USAR.amazonaws.com
+   docker tag back-end-recipes:latest ACA_ACTUALIZAR_CON_LA_URL_QUE_VAYAMOS_A_USAR.amazonaws.com/back-end-recipes:latest
+   docker push ACA_ACTUALIZAR_CON_LA_URL_QUE_VAYAMOS_A_USAR.dkr.ecr.tu-region.amazonaws.com/back-end-recipes:latest
+   ```
 
-```bash
-# development
-$ npm run start
+### Paso 2: Desplegar en ECS
 
-# watch mode
-$ npm run start:dev
+1. **Crear Clúster ECS:**
+   - En la consola ECS, crea un nuevo clúster (tipo "EC2").
 
-# production mode
-$ npm run start:prod
-```
+2. **Definir Tarea:**
+   - Crea una nueva definición de tarea usando la imagen de ECR.
+   - Configura el contenedor para usar el puerto 3000.
 
-## Run tests
+3. **Crear Servicio ECS:**
+   - Utiliza la definición de tarea.
+   - Asocia con una balanceadora de carga si es necesario.
 
-```bash
-# unit tests
-$ npm run test
+4. **Configurar Redes:**
+   - Asegura permisos de tráfico en el puerto 3000.
 
-# e2e tests
-$ npm run test:e2e
+### Configuración de Base de Datos
 
-# test coverage
-$ npm run test:cov
-```
+- **MongoDB Atlas:**
+  - Crea un cluster en MongoDB Atlas. (Similar a como hicimos con la de pruebas)
+  - Permite IP de AWS para acceso.
 
+- **Conectar desde NestJS:**
+  - Configura la conexión en tu aplicación usando URI seguros.
 
-## Algunos curls para probar local
+# Generación de APK para `app-recipes` en Android Studio
 
-# 📌 API de Recetas - Endpoints y cURL
+### Requisitos Previos
 
-## 🛠️ CRUD de Recetas con NestJS y MongoDB
+- Tener Android Studio instalado.
+- Abrir el proyecto `app-recipes` realizado en Kotlin dentro de Android Studio.
 
----
+### Paso 1: Configuración Básica
 
-## **📍 1. GET - Obtener todas las recetas**
-```sh
-curl -X GET http://localhost:3000/recipes
-```
+1. **Abrir el Proyecto `app-recipes`:**
+   - Tener abierto el proyecto `app-recipes` en Android Studio.
 
-📌 **Ejemplo de Respuesta (JSON)**:
-```json
-[
-  {
-    "_id": "60c72b2f5f1b2c001c8e4d7a",
-    "name": "Tarta de Manzana",
-    "ingredients": ["Harina", "Manzana", "Azúcar", "Canela", "Manteca"],
-    "steps": [
-      { "description": "Precalentar el horno a 180°C" },
-      { "description": "Preparar la masa", "imageUrl": "https://example.com/images/step1.jpg" }
-    ],
-    "imageUrls": ["https://example.com/images/tarta.jpg"],
-    "userId": "12345"
-  }
-]
-```
+2. **Verificar Configuración del Build:**
+   - Revisar el archivo `build.gradle (Module: app)` para confirmar que todo esté configurado correctamente:
+     - **minSdkVersion y targetSdkVersion:** Revisar según los dispositivos que queramos puedan usar la aplicación.
+     - **Dependencias:** Verificar que estén incluidas todas las bibliotecas necesarias que utiliza la aplicación.
 
----
+### Paso 2: Configuración del Signing (Firma)
 
-## **📍 2. GET - Obtener una receta por ID**
-```sh
-curl -X GET http://localhost:3000/recipes/60c72b2f5f1b2c001c8e4d7a
-```
+1. **Crear un Keystore:**
+   - Navegar a `Build > Generate Signed Bundle/APK` en el menú superior.
+   - Seleccionar `APK` y hacer clic en `Next`.
+   - Si no existe un keystore, hacer clic en `Create new`:
+     - **Key store path:** Seleccionar una ubicación segura para guardar `app-recipes-keystore.jks`.
+     - **Password:** Elegir una contraseña segura para el keystore.
+     - **Key alias:** Utilizar `appRecipesKey` para identificar la clave.
+     - **Key password:** Seteamos la contraseña (puede ser diferente de la del keystore).
 
----
+2. **Guardar Keystore:**
+   - Almacenar esta información de manera segura.
 
-## **📍 3. POST - Crear una receta con varios pasos**
-```sh
-curl -X POST http://localhost:3000/recipes \
-     -H "Content-Type: application/json" \
-     -d '{
-           "name": "Tarta de Manzana",
-           "ingredients": ["Harina", "Manzana", "Azúcar", "Canela", "Manteca"],
-           "steps": [
-             { "description": "Precalentar el horno a 180°C" },
-             { "description": "Preparar la masa", "imageUrl": "https://example.com/images/step1.jpg" },
-             { "description": "Cortar las manzanas", "imageUrl": "https://example.com/images/step2.jpg" },
-             { "description": "Armar la tarta y hornear" }
-           ],
-           "imageUrls": ["https://example.com/images/tarta.jpg"],
-           "userId": "12345"
-         }'
-```
+### Paso 3: Generación del APK
 
-📌 **Notas**:
-- Se incluyen varios pasos (`steps`), algunos con imágenes (`imageUrl`).
-- Se envía un **userId obligatorio**.
+1. **Generar APK Firmado:**
+   - Navegar nuevamente a `Build > Generate Signed Bundle/APK`.
+   - Elegir `APK` y hacer clic en `Next`.
+   - Seleccionar el keystore guardado:
+     - **Key store path:** Confirmar la ruta de `app-recipes-keystore.jks`.
+     - **Key alias y Password:** Introducir los detalles del keystore.
+   - Hacer clic en `Next`.
 
----
+2. **Seleccionar Modo de Compilación:**
+   - Elegir la opción `release` para una versión lista para distribución.
+   - Activar las opciones V1 (Jar Signature) y V2 (Full APK Signature).
 
-## **📍 4. PUT - Actualizar una receta (ejemplo: cambiar nombre)**
-```sh
-curl -X PUT http://localhost:3000/recipes/60c72b2f5f1b2c001c8e4d7a \
-     -H "Content-Type: application/json" \
-     -d '{
-           "name": "Tarta de Manzana Casera"
-         }'
-```
+3. **Generar APK:**
+   - Hacer clic en `Finish`.
+   - Esperar que Android Studio compile el proyecto y genere el APK para `app-recipes`.
 
----
+### Paso 4: Acceder al APK Generado
 
-## **📍 5. PUT - Eliminar un paso de la receta**
-```sh
-curl -X PUT http://localhost:3000/recipes/60c72b2f5f1b2c001c8e4d7a \
-     -H "Content-Type: application/json" \
-     -d '{
-           "steps": [
-             { "description": "Precalentar el horno a 180°C" },
-             { "description": "Preparar la masa", "imageUrl": "https://example.com/images/step1.jpg" },
-             { "description": "Armar la tarta y hornear" }
-           ]
-         }'
-```
-📌 **Elimina el paso "Cortar las manzanas" simplemente omitiéndolo en la actualización.**
+1. **Ubicar el APK:**
+   - Al finalizar el proceso, un modal muestra dónde se encuentra el APK.
+   - Normalmente, estará en `app-recipes/app/release/app-recipes-release.apk`.
 
----
-
-## **📍 6. DELETE - Eliminar una receta**
-```sh
-curl -X DELETE http://localhost:3000/recipes/60c72b2f5f1b2c001c8e4d7a
-```
-
-📌 **Borra la receta completamente de la base de datos.**
-
----
-
-## 📜 **Notas Finales**
-- 📌 **Reemplaza los IDs de ejemplo (`60c72b2f5f1b2c001c8e4d7a`) por IDs reales de tu base de datos.**
-- 🚀 **Asegúrate de que el servidor esté corriendo antes de probar los endpoints.**
-- 🔐 **Si usas autenticación, agrega el token en los headers con `-H "Authorization: Bearer <tu_token>"`.**
-
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-
-
-
+2. **Verificar el APK:**
+   - Probar el APK en un dispositivo físico o en un emulador para asegurar que todo funcione como se espera.
 
