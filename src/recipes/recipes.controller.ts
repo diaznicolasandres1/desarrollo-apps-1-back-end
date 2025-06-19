@@ -16,6 +16,7 @@ import { UpdateRecipeDto } from "./dto/update-recipe.dto";
 import { RecipesService } from "./recipes.service";
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, ApiBody, ApiHeader } from '@nestjs/swagger';
 import { RatingDto, UpdateRatingDto } from './dto/nested/recipe-nested.dto';
+import { Recipe } from "./schemas/recipe.schema";
 
 @ApiTags('Recetas')
 @Controller("recipes")
@@ -162,5 +163,26 @@ export class RecipesController {
       message: "Calificación actualizada exitosamente",
       data: recipe
     };
+  }
+
+  @Get("user/:userId")
+  @ApiOperation({ summary: 'Obtener recetas de un usuario específico' })
+  @ApiParam({ 
+    name: 'userId', 
+    description: 'ID del usuario',
+    type: String,
+    required: true 
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Recetas obtenidas exitosamente',
+    type: [Recipe]
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Usuario no encontrado' 
+  })
+  async getRecipesByUser(@Param("userId") userId: string) {
+    return this.recipesService.getRecipesByUser(userId);
   }
 }
