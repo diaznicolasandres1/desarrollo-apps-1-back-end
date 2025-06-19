@@ -152,4 +152,12 @@ export class RecipesService {
 
     return recipe.save();
   }
+
+  async getRecipesByUser(userId: string): Promise<Recipe[]> {
+    const recipes = await this.recipeModel.find({ userId }).exec();
+    if (!recipes) {
+      throw new NotFoundException(`No se encontraron recetas para el usuario ${userId}`);
+    }
+    return recipes;
+  }
 }
