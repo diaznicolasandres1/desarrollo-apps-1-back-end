@@ -101,11 +101,11 @@ export class Recipe extends Document {
   principalPictures?: MediaResource[];
 
   @ApiProperty({
-    example: 'usuario123',
-    description: 'Nombre de usuario del creador de la receta'
+    example: '507f1f77bcf86cd799439013',
+    description: 'ID del usuario creador de la receta'
   })
   @Prop({ required: true })
-  userName: string;
+  userId: string;
 
   @ApiProperty({
     example: ['postres', 'dulces', 'tartas'],
