@@ -58,12 +58,13 @@ export class RecipesService {
       });
     }
 
-    // Filtro por nombres de recetas (búsqueda exacta con OR)
+    // Filtro por nombres de recetas (búsqueda exacta case-insensitive con OR)
     if (recipeNames && recipeNames.length > 0) {
-      const trimmedNames = recipeNames.map(name => name.trim()).filter(name => name.length > 0);
-      if (trimmedNames.length > 0) {
+      const filteredNames = recipeNames.filter(name => name.length > 0);
+      if (filteredNames.length > 0) {
+        const exactNameRegex = filteredNames.map(name => new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i"));
         andConditions.push({
-          name: { $in: trimmedNames }
+          $or: exactNameRegex.map(regex => ({ name: { $regex: regex } }))
         });
       }
     }
