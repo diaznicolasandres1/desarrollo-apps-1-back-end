@@ -58,12 +58,14 @@ export class RecipesService {
       });
     }
 
-    // Filtro por nombres de recetas (búsqueda parcial con OR)
+    // Filtro por nombres de recetas (búsqueda exacta con OR)
     if (recipeNames && recipeNames.length > 0) {
-      const nameRegex = recipeNames.map(name => new RegExp(name.trim(), "i"));
-      andConditions.push({
-        $or: nameRegex.map(regex => ({ name: { $regex: regex } }))
-      });
+      const trimmedNames = recipeNames.map(name => name.trim()).filter(name => name.length > 0);
+      if (trimmedNames.length > 0) {
+        andConditions.push({
+          name: { $in: trimmedNames }
+        });
+      }
     }
 
     // Filtro por userIds (búsqueda exacta con OR)
