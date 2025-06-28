@@ -39,7 +39,7 @@ export class RecipesController {
   @ApiOperation({ summary: 'Filtrar recetas por ingredientes, nombres y usuarios' })
   @ApiQuery({ name: 'include', required: false, description: 'Ingredientes que deben incluir (separados por comas)' })
   @ApiQuery({ name: 'exclude', required: false, description: 'Ingredientes que deben excluir (separados por comas)' })
-  @ApiQuery({ name: 'name', required: false, description: 'Nombres de recetas a buscar (separados por comas, búsqueda parcial)' })
+  @ApiQuery({ name: 'name', required: false, description: 'Nombres de recetas a buscar (separados por comas, búsqueda exacta)' })
   @ApiQuery({ name: 'userId', required: false, description: 'IDs de usuarios creadores (separados por comas)' })
   @ApiResponse({ status: 200, description: 'Lista de recetas filtradas obtenida exitosamente' })
   async getFilteredByIngredients(
