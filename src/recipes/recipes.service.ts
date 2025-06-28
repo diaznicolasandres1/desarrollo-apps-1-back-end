@@ -36,28 +36,49 @@ export class RecipesService {
   async getFilteredByIngredients(
     includeIngredients: string[],
     excludeIngredients: string[],
+    recipeNames?: string[],
+    userIds?: string[],
   ): Promise<Recipe[]> {
-    if ((!includeIngredients || includeIngredients.length === 0) && 
-        (!excludeIngredients || excludeIngredients.length === 0)) {
-      return this.recipeModel.find().exec();
-    }
-
-    const includeRegex = includeIngredients.map(ing => new RegExp(ing, "i"));
-    const excludeRegex = excludeIngredients.map(ing => new RegExp(ing, "i"));
-
     const query: any = {};
+    const andConditions: any[] = [];
 
-    if (includeRegex.length > 0) {
-      query.$and = [
-        { ingredients: { $in: includeRegex } }
-      ];
+    // Filtro por ingredientes a incluir
+    if (includeIngredients && includeIngredients.length > 0) {
+      const includeRegex = includeIngredients.map(ing => new RegExp(ing, "i"));
+      andConditions.push({
+        "ingredients.name": { $in: includeRegex }
+      });
     }
 
-    if (excludeRegex.length > 0) {
-      if (!query.$and) {
-        query.$and = [];
+    // Filtro por ingredientes a excluir
+    if (excludeIngredients && excludeIngredients.length > 0) {
+      const excludeRegex = excludeIngredients.map(ing => new RegExp(ing, "i"));
+      andConditions.push({
+        "ingredients.name": { $nin: excludeRegex }
+      });
+    }
+
+    // Filtro por nombres de recetas (búsqueda parcial con OR)
+    if (recipeNames && recipeNames.length > 0) {
+      const nameRegex = recipeNames.map(name => new RegExp(name.trim(), "i"));
+      andConditions.push({
+        $or: nameRegex.map(regex => ({ name: { $regex: regex } }))
+      });
+    }
+
+    // Filtro por userIds (búsqueda exacta con OR)
+    if (userIds && userIds.length > 0) {
+      const trimmedUserIds = userIds.map(id => id.trim()).filter(id => id.length > 0);
+      if (trimmedUserIds.length > 0) {
+        andConditions.push({
+          userId: { $in: trimmedUserIds }
+        });
       }
-      query.$and.push({ ingredients: { $nin: excludeRegex } });
+    }
+
+    // Si hay condiciones, aplicar filtros
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
     }
 
     return this.recipeModel.find(query).exec();

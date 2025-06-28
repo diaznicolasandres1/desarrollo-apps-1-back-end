@@ -36,20 +36,28 @@ export class RecipesController {
   }
 
   @Get("filter")
-  @ApiOperation({ summary: 'Filtrar recetas por ingredientes' })
+  @ApiOperation({ summary: 'Filtrar recetas por ingredientes, nombres y usuarios' })
   @ApiQuery({ name: 'include', required: false, description: 'Ingredientes que deben incluir (separados por comas)' })
   @ApiQuery({ name: 'exclude', required: false, description: 'Ingredientes que deben excluir (separados por comas)' })
+  @ApiQuery({ name: 'name', required: false, description: 'Nombres de recetas a buscar (separados por comas, búsqueda parcial)' })
+  @ApiQuery({ name: 'userId', required: false, description: 'IDs de usuarios creadores (separados por comas)' })
   @ApiResponse({ status: 200, description: 'Lista de recetas filtradas obtenida exitosamente' })
   async getFilteredByIngredients(
     @Query("include") include: string,
     @Query("exclude") exclude: string,
+    @Query("name") name: string,
+    @Query("userId") userId: string,
   ) {
     const includeArray = include ? include.split(",") : [];
     const excludeArray = exclude ? exclude.split(",") : [];
+    const nameArray = name ? name.split(",") : [];
+    const userIdArray = userId ? userId.split(",") : [];
 
     return this.recipesService.getFilteredByIngredients(
       includeArray,
       excludeArray,
+      nameArray,
+      userIdArray,
     );
   }
 
