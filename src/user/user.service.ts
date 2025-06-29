@@ -1,24 +1,32 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { User } from "./schemas/user.schema";
-import { UsernameExistsException } from "./exceptions/username-exists.exception";
-import { EmailExistsException } from "./exceptions/email-exists.exception";
+import { AddFavoriteRecipeDto } from "./dto/add-favorite-recipe.dto";
 import { AuthUserDto } from "./dto/auth-user.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
-import { AddFavoriteRecipeDto } from "./dto/add-favorite-recipe.dto";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { EmailExistsException } from "./exceptions/email-exists.exception";
+import { UsernameExistsException } from "./exceptions/username-exists.exception";
+import { User } from "./schemas/user.schema";
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(dto: CreateUserDto): Promise<User> {
-    const existingUsername = await this.userModel.findOne({ username: dto.username }).exec();
+    const existingUsername = await this.userModel
+      .findOne({ username: dto.username })
+      .exec();
     if (existingUsername) {
       throw new UsernameExistsException(dto.username);
     }
-    const existingEmail = await this.userModel.findOne({ email: dto.email }).exec();
+    const existingEmail = await this.userModel
+      .findOne({ email: dto.email })
+      .exec();
     if (existingEmail) {
       throw new EmailExistsException(dto.email);
     }
@@ -53,7 +61,9 @@ export class UserService {
   async findByUsername(username: string): Promise<User> {
     const user = await this.userModel.findOne({ username }).exec();
     if (!user) {
-      throw new NotFoundException(`Usuario con username ${username} no encontrado`);
+      throw new NotFoundException(
+        `Usuario con username ${username} no encontrado`
+      );
     }
     return user;
   }
@@ -70,11 +80,13 @@ export class UserService {
     const user = await this.userModel.findOne({ email });
 
     if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
+      throw new NotFoundException("Usuario no encontrado");
     }
 
-    if (user.status !== 'full_registered') {
-      throw new BadRequestException('El usuario no está completamente registrado');
+    if (user.status !== "full_registered") {
+      throw new BadRequestException(
+        "El usuario no está completamente registrado"
+      );
     }
 
     const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -82,60 +94,67 @@ export class UserService {
     await user.save();
 
     return {
-      message: 'Código de recuperación generado exitosamente',
-      recoveryCode
+      message: "Código de recuperación generado exitosamente",
+      recoveryCode,
     };
   }
 
   async authUser(authUserDto: AuthUserDto) {
-    const user = await this.userModel.findOne({ 
+    const user = await this.userModel.findOne({
       email: authUserDto.email,
-      password: authUserDto.password
+      password: authUserDto.password,
     });
 
     if (!user) {
-      throw new NotFoundException('Usuario o contraseña incorrectos');
+      throw new NotFoundException("Usuario o contraseña incorrectos");
     }
 
-    if (user.status === 'register_not_finished') {
-      throw new BadRequestException('El registro del usuario no está completo');
+    if (user.status === "register_not_finished") {
+      throw new BadRequestException("El registro del usuario no está completo");
     }
 
     return user;
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto) {
-    const user = await this.userModel.findOne({ 
+    const user = await this.userModel.findOne({
       email: changePasswordDto.email,
-      lastRecoveryCode: changePasswordDto.recoveryCode
+      lastRecoveryCode: changePasswordDto.recoveryCode,
     });
 
     if (!user) {
-      throw new NotFoundException('Usuario no encontrado o código de recuperación inválido');
+      throw new NotFoundException(
+        "Usuario no encontrado o código de recuperación inválido"
+      );
     }
 
-    if (user.status !== 'full_registered') {
-      throw new BadRequestException('El usuario no está completamente registrado');
+    if (user.status !== "full_registered") {
+      throw new BadRequestException(
+        "El usuario no está completamente registrado"
+      );
     }
 
     user.password = changePasswordDto.newPassword;
-    user.lastRecoveryCode = ''; 
+    user.lastRecoveryCode = "";
     await user.save();
 
     return {
-      message: 'Contraseña actualizada exitosamente'
+      message: "Contraseña actualizada exitosamente",
     };
   }
 
-  async addFavoriteRecipe(userId: string, dto: AddFavoriteRecipeDto): Promise<User> {
+  async addFavoriteRecipe(
+    userId: string,
+    dto: AddFavoriteRecipeDto
+  ): Promise<User> {
     const user = await this.userModel.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
     }
 
     if (user.favedRecipesIds?.includes(dto.recipeId)) {
-      throw new BadRequestException('La receta ya está en favoritos');
+      throw new BadRequestException("La receta ya está en favoritos");
     }
 
     if (!user.favedRecipesIds) {
@@ -147,4 +166,21 @@ export class UserService {
 
     return user;
   }
-} 
+
+  async removeFavoriteRecipe(userId: string, recipeId: string): Promise<User> {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+
+    if (!user.favedRecipesIds || !user.favedRecipesIds.includes(recipeId)) {
+      throw new NotFoundException("Usuario o receta no encontrados");
+    }
+
+    user.favedRecipesIds = user.favedRecipesIds.filter((id) => id !== recipeId);
+    await user.save();
+
+    return user;
+  }
+}

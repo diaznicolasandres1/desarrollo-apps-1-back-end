@@ -1,15 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+import * as mongoose from "mongoose";
 import { Model } from "mongoose";
+import { User } from "../user/schemas/user.schema";
 import { CreateRecipeDto } from "./dto/create-recipe.dto";
+import { RatingDto, UpdateRatingDto } from "./dto/nested/recipe-nested.dto";
 import { UpdateRecipeDto } from "./dto/update-recipe.dto";
 import { Recipe } from "./schemas/recipe.schema";
-import { RatingDto, UpdateRatingDto } from "./dto/nested/recipe-nested.dto";
-import * as mongoose from "mongoose";
 
 @Injectable()
 export class RecipesService {
-  constructor(@InjectModel(Recipe.name) private recipeModel: Model<Recipe>) {}
+  constructor(
+    @InjectModel(Recipe.name) private recipeModel: Model<Recipe>,
+    @InjectModel(User.name) private userModel: Model<User>
+  ) {}
 
   async getAll(limit?: number, sortOrder: string = "desc"): Promise<Recipe[]> {
     const sortValue = sortOrder === "asc" ? 1 : -1;
@@ -37,43 +41,49 @@ export class RecipesService {
     includeIngredients: string[],
     excludeIngredients: string[],
     recipeNames?: string[],
-    userIds?: string[],
+    userIds?: string[]
   ): Promise<Recipe[]> {
     const query: any = {};
     const andConditions: any[] = [];
 
     // Filtro por ingredientes a incluir
     if (includeIngredients && includeIngredients.length > 0) {
-      const includeRegex = includeIngredients.map(ing => new RegExp(ing, "i"));
+      const includeRegex = includeIngredients.map(
+        (ing) => new RegExp(ing, "i")
+      );
       andConditions.push({
-        "ingredients.name": { $in: includeRegex }
+        "ingredients.name": { $in: includeRegex },
       });
     }
 
     // Filtro por ingredientes a excluir
     if (excludeIngredients && excludeIngredients.length > 0) {
-      const excludeRegex = excludeIngredients.map(ing => new RegExp(ing, "i"));
+      const excludeRegex = excludeIngredients.map(
+        (ing) => new RegExp(ing, "i")
+      );
       andConditions.push({
-        "ingredients.name": { $nin: excludeRegex }
+        "ingredients.name": { $nin: excludeRegex },
       });
     }
 
     // Filtro por nombres de recetas (búsqueda exacta)
     if (recipeNames && recipeNames.length > 0) {
-      const filteredNames = recipeNames.filter(name => name.length > 0);
+      const filteredNames = recipeNames.filter((name) => name.length > 0);
       if (filteredNames.length > 0) {
         andConditions.push({
-          name: { $in: filteredNames }
+          name: { $in: filteredNames },
         });
       }
     }
 
     // Filtro por userIds (búsqueda exacta con OR)
     if (userIds && userIds.length > 0) {
-      const trimmedUserIds = userIds.map(id => id.trim()).filter(id => id.length > 0);
+      const trimmedUserIds = userIds
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0);
       if (trimmedUserIds.length > 0) {
         andConditions.push({
-          userId: { $in: trimmedUserIds }
+          userId: { $in: trimmedUserIds },
         });
       }
     }
@@ -120,7 +130,7 @@ export class RecipesService {
     const updatedRecipe = await this.recipeModel.findByIdAndUpdate(
       id,
       { status: "approved" },
-      { new: true },
+      { new: true }
     );
 
     if (!updatedRecipe) {
@@ -132,18 +142,25 @@ export class RecipesService {
 
   async addRating(id: string, rating: RatingDto): Promise<Recipe> {
     const recipe = await this.recipeModel.findById(id);
-    
+
     if (!recipe) {
       throw new NotFoundException(`Recipe with id ${id} not found`);
+    }
+
+    // Buscar el usuario para obtener su nombre
+    const user = await this.userModel.findById(rating.userId);
+    if (!user) {
+      throw new NotFoundException(`User with id ${rating.userId} not found`);
     }
 
     const newRating = {
       id: new mongoose.Types.ObjectId().toString(),
       userId: rating.userId,
+      name: user.username,
       score: rating.score,
       comment: rating.comment,
-      status: 'pending',
-      createdAt: new Date()
+      status: "pending",
+      createdAt: new Date(),
     };
 
     recipe.ratings = recipe.ratings || [];
@@ -152,25 +169,34 @@ export class RecipesService {
     return recipe.save();
   }
 
-  async updateRating(recipeId: string, ratingId: string, userId: string, dto: UpdateRatingDto): Promise<Recipe> {
+  async updateRating(
+    recipeId: string,
+    ratingId: string,
+    userId: string,
+    dto: UpdateRatingDto
+  ): Promise<Recipe> {
     const recipe = await this.recipeModel.findById(recipeId);
-    
+
     if (!recipe) {
       throw new NotFoundException(`Recipe with id ${recipeId} not found`);
     }
 
     recipe.ratings = recipe.ratings || [];
-    const ratingIndex = recipe.ratings.findIndex(r => r.id === ratingId && r.userId === userId);
-    
+    const ratingIndex = recipe.ratings.findIndex(
+      (r) => r.id === ratingId && r.userId === userId
+    );
+
     if (ratingIndex === -1) {
-      throw new NotFoundException(`Rating with id ${ratingId} not found for this user`);
+      throw new NotFoundException(
+        `Rating with id ${ratingId} not found for this user`
+      );
     }
 
     recipe.ratings[ratingIndex] = {
       ...recipe.ratings[ratingIndex],
       score: dto.score,
       comment: dto.comment,
-      status: 'pending'
+      status: "pending",
     };
 
     return recipe.save();
@@ -179,7 +205,9 @@ export class RecipesService {
   async getRecipesByUser(userId: string): Promise<Recipe[]> {
     const recipes = await this.recipeModel.find({ userId }).exec();
     if (!recipes) {
-      throw new NotFoundException(`No se encontraron recetas para el usuario ${userId}`);
+      throw new NotFoundException(
+        `No se encontraron recetas para el usuario ${userId}`
+      );
     }
     return recipes;
   }
