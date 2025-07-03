@@ -97,8 +97,11 @@ export class RecipesService {
     if (categoryArray && categoryArray.length > 0) {
       const filteredCategories = categoryArray.filter((cat) => cat.length > 0);
       if (filteredCategories.length > 0) {
+        const categoryRegex = filteredCategories.map(
+          (cat) => new RegExp(cat, "i")
+        );
         andConditions.push({
-          category: { $in: filteredCategories },
+          category: { $in: categoryRegex },
         });
       }
     }
