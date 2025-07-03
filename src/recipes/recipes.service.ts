@@ -41,7 +41,8 @@ export class RecipesService {
     includeIngredients: string[],
     excludeIngredients: string[],
     recipeNames?: string[],
-    userIds?: string[]
+    userIds?: string[],
+    categoryArray?: string[]
   ): Promise<Recipe[]> {
     const query: any = {};
     const andConditions: any[] = [];
@@ -84,6 +85,16 @@ export class RecipesService {
       if (trimmedUserIds.length > 0) {
         andConditions.push({
           userId: { $in: trimmedUserIds },
+        });
+      }
+    }
+
+    // Filtro por categorías
+    if (categoryArray && categoryArray.length > 0) {
+      const filteredCategories = categoryArray.filter((cat) => cat.length > 0);
+      if (filteredCategories.length > 0) {
+        andConditions.push({
+          category: { $in: filteredCategories },
         });
       }
     }
