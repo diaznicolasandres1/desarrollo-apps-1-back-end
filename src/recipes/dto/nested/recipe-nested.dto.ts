@@ -131,4 +131,11 @@ export class UpdateRatingDto {
     required: false,
   })
   comment?: string;
+
+  @ApiProperty({
+    example: "approved",
+    description: "Nuevo estado del comentario",
+    enum: ["pending", "approved", "rejected"],
+  })
+  status?: string;
 }

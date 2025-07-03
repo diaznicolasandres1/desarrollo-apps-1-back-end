@@ -15,10 +15,15 @@ export class RecipesService {
     @InjectModel(User.name) private userModel: Model<User>
   ) {}
 
-  async getAll(limit?: number, sortOrder: string = "desc"): Promise<Recipe[]> {
+  async getAll(
+    limit?: number,
+    sortOrder: string = "desc",
+    onlyApproved: boolean = true
+  ): Promise<Recipe[]> {
     const sortValue = sortOrder === "asc" ? 1 : -1;
 
-    const query = this.recipeModel.find().sort({ createdAt: sortValue });
+    const filter = onlyApproved ? { status: "approved" } : {};
+    const query = this.recipeModel.find(filter).sort({ createdAt: sortValue });
 
     if (limit) {
       query.limit(limit);
@@ -40,9 +45,10 @@ export class RecipesService {
   async getFilteredByIngredients(
     includeIngredients: string[],
     excludeIngredients: string[],
-    recipeNames?: string[],
+    name?: string,
     userIds?: string[],
-    categoryArray?: string[]
+    categoryArray?: string[],
+    onlyApproved: boolean = true
   ): Promise<Recipe[]> {
     const query: any = {};
     const andConditions: any[] = [];
@@ -68,13 +74,11 @@ export class RecipesService {
     }
 
     // Filtro por nombres de recetas (búsqueda exacta)
-    if (recipeNames && recipeNames.length > 0) {
-      const filteredNames = recipeNames.filter((name) => name.length > 0);
-      if (filteredNames.length > 0) {
-        andConditions.push({
-          name: { $in: filteredNames },
-        });
-      }
+    if (name && name.trim().length > 0) {
+      const nameRegex = new RegExp(name.trim(), "i");
+      andConditions.push({
+        name: { $regex: nameRegex },
+      });
     }
 
     // Filtro por userIds (búsqueda exacta con OR)
@@ -97,6 +101,11 @@ export class RecipesService {
           category: { $in: filteredCategories },
         });
       }
+    }
+
+    // Filtro por estado de aprobación
+    if (onlyApproved) {
+      andConditions.push({ status: "approved" });
     }
 
     // Si hay condiciones, aplicar filtros
@@ -207,7 +216,7 @@ export class RecipesService {
       ...recipe.ratings[ratingIndex],
       score: dto.score,
       comment: dto.comment,
-      status: "pending",
+      status: dto.status || recipe.ratings[ratingIndex].status || "pending",
     };
 
     return recipe.save();
